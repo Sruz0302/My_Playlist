@@ -1,34 +1,34 @@
-package com.sruz.myplaylist
+package com.sruz.myplaylist.ui
 
 import android.app.Activity
 import android.content.Intent
 import android.media.MediaPlayer
+import android.media.Ringtone
+import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Bundle
 import android.provider.OpenableColumns
 import android.util.Log
+import android.view.View
+import android.widget.ImageView
+import android.widget.SeekBar
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.NonNull
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.sruz.myplaylist.R
 import com.sruz.myplaylist.adapter.PlayListAdapter
 import com.sruz.myplaylist.database.PlayListDatabase
 import com.sruz.myplaylist.database.model.PlayList
 import com.sruz.myplaylist.databinding.ActivityMainBinding
-import android.media.RingtoneManager
-
-import android.media.Ringtone
-import android.view.View
-import android.widget.ImageView
-import android.widget.SeekBar
-import androidx.annotation.NonNull
-import androidx.recyclerview.widget.RecyclerView
 
 
 class MainActivity : AppCompatActivity() {
-    private lateinit var mBinidng: ActivityMainBinding
+    private lateinit var mBinding: ActivityMainBinding
     var mediaPlayer: MediaPlayer? = null
     private lateinit var vm: MainActivityVm
     private lateinit var adapter: PlayListAdapter
@@ -41,12 +41,12 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        mBinidng = DataBindingUtil.setContentView(
+        mBinding = DataBindingUtil.setContentView(
             this,
             R.layout.activity_main
         )
         vm = ViewModelProviders.of(this)[MainActivityVm::class.java]
-        setUpRecyClerView()
+        setUpRecyclerView()
 
 
 
@@ -55,25 +55,25 @@ class MainActivity : AppCompatActivity() {
 
             adapter.submitList(it)
         })
-        mBinidng.btnAddPlayList.setOnClickListener {
-            val intent_upload = Intent()
-            intent_upload.type = "audio/*"
-            intent_upload.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
-            intent_upload.action = Intent.ACTION_GET_CONTENT
-            intent_upload.flags =
+        mBinding.btnAddPlayList.setOnClickListener {
+            val intentUpload = Intent()
+            intentUpload.type = "audio/*"
+            intentUpload.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
+            intentUpload.action = Intent.ACTION_GET_CONTENT
+            intentUpload.flags =
                 Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
-            resultLauncher.launch(intent_upload)
+            resultLauncher.launch(intentUpload)
 
         }
 
-        mBinidng.recyclerPlayList.adapter = adapter
+        mBinding.recyclerPlayList.adapter = adapter
 
     }
 
-    private fun setUpRecyClerView() {
+    private fun setUpRecyclerView() {
 
-        mBinidng.recyclerPlayList.layoutManager = LinearLayoutManager(this)
-        mBinidng.recyclerPlayList.setHasFixedSize(true)
+        mBinding.recyclerPlayList.layoutManager = LinearLayoutManager(this)
+        mBinding.recyclerPlayList.setHasFixedSize(true)
 
         adapter = PlayListAdapter(
             this
@@ -114,22 +114,22 @@ class MainActivity : AppCompatActivity() {
         adapter.setListener(attachmentListener)
 
 
-        mBinidng.recyclerPlayList.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+        mBinding.recyclerPlayList.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrollStateChanged(@NonNull recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
             }
 
             override fun onScrolled(@NonNull recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
-                val visiblePosition: Int = (mBinidng.recyclerPlayList.layoutManager as LinearLayoutManager).findFirstCompletelyVisibleItemPosition()
+                val visiblePosition: Int = (mBinding.recyclerPlayList.layoutManager as LinearLayoutManager).findFirstCompletelyVisibleItemPosition()
                 if (visiblePosition > -1) {
-                    val firstElementPosition: Int = (mBinidng.recyclerPlayList.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
-                    val v: View? = (mBinidng.recyclerPlayList.layoutManager as LinearLayoutManager).findViewByPosition(visiblePosition)
+                    (mBinding.recyclerPlayList.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
+                    val v: View? = (mBinding.recyclerPlayList.layoutManager as LinearLayoutManager).findViewByPosition(visiblePosition)
                     //do something
-                    var visibleChild: View = mBinidng.recyclerPlayList.getChildAt(0)
-                    val firstChild: Int = mBinidng.recyclerPlayList.getChildAdapterPosition(visibleChild)
-                    visibleChild = mBinidng.recyclerPlayList.getChildAt(mBinidng.recyclerPlayList.childCount - 1)
-                    val lastChild: Int = mBinidng.recyclerPlayList.getChildAdapterPosition(visibleChild)
+                    var visibleChild: View = mBinding.recyclerPlayList.getChildAt(0)
+                    val firstChild: Int = mBinding.recyclerPlayList.getChildAdapterPosition(visibleChild)
+                    visibleChild = mBinding.recyclerPlayList.getChildAt(mBinding.recyclerPlayList.childCount - 1)
+                    val lastChild: Int = mBinding.recyclerPlayList.getChildAdapterPosition(visibleChild)
                     if(currentItem in firstChild .. lastChild){
                        Log.e("visible","yes")
                     }else{
@@ -144,7 +144,7 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
-        mBinidng.recyclerPlayList.adapter = adapter
+        mBinding.recyclerPlayList.adapter = adapter
     }
     var attachmentListener: PlayListAdapter.PlayListListener =
         object : PlayListAdapter.PlayListListener {

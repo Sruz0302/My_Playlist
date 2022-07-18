@@ -1,4 +1,4 @@
-package com.sruz.myplaylist
+package com.sruz.myplaylist.ui
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
