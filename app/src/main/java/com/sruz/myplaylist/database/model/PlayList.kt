@@ -1,10 +1,8 @@
 package com.sruz.myplaylist.database.model
 
 
-import android.net.Uri
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import java.text.FieldPosition
 
 
 @Entity(tableName = "playlist_table")

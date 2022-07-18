@@ -25,17 +25,17 @@ import com.sruz.myplaylist.adapter.PlayListAdapter
 import com.sruz.myplaylist.database.PlayListDatabase
 import com.sruz.myplaylist.database.model.PlayList
 import com.sruz.myplaylist.databinding.ActivityMainBinding
+import com.sruz.myplaylist.helpers.CustomToast
+import com.sruz.myplaylist.helpers.Utils
+import java.util.concurrent.TimeUnit
 
 
 class MainActivity : AppCompatActivity() {
     private lateinit var mBinding: ActivityMainBinding
-    var mediaPlayer: MediaPlayer? = null
     private lateinit var vm: MainActivityVm
     private lateinit var adapter: PlayListAdapter
-    private val playListDataBase by lazy { PlayListDatabase.getInstance(this).playListDao() }
     private var ringtoneManager: Ringtone? = null
     private var playing:Boolean=false
-    private var linearLayoutManager:LinearLayoutManager?=null
     private var currentItem :Int=0
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,21 +48,22 @@ class MainActivity : AppCompatActivity() {
         vm = ViewModelProviders.of(this)[MainActivityVm::class.java]
         setUpRecyclerView()
 
-
-
         vm.getAllNotes().observe(this, Observer {
-            Log.i("Notes observed", "$it")
-
             adapter.submitList(it)
         })
         mBinding.btnAddPlayList.setOnClickListener {
-            val intentUpload = Intent()
-            intentUpload.type = "audio/*"
-            intentUpload.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
-            intentUpload.action = Intent.ACTION_GET_CONTENT
-            intentUpload.flags =
-                Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
-            resultLauncher.launch(intentUpload)
+            if(Utils.isNetworkAvailable()){
+                val intentUpload = Intent()
+                intentUpload.type = "audio/*"
+                intentUpload.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
+                intentUpload.action = Intent.ACTION_GET_CONTENT
+                intentUpload.flags =
+                    Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
+                resultLauncher.launch(intentUpload)
+
+            }else{
+                CustomToast.makeToast("No internet connection")
+            }
 
         }
 
@@ -94,13 +95,13 @@ class MainActivity : AppCompatActivity() {
                 ringtoneManager = RingtoneManager.getRingtone(applicationContext, uri)
                 if(!playing){
                     playing=true
-                    if (!ringtoneManager!!.isPlaying) {
+                    playing = if (!ringtoneManager!!.isPlaying) {
                         ringtoneManager!!.play()
-                        playing=true
+                        true
 
                     } else {
                         ringtoneManager!!.stop()
-                        playing=false
+                        false
                     }
                 }else{
                     ringtoneManager!!.stop()
@@ -133,12 +134,12 @@ class MainActivity : AppCompatActivity() {
                     if(currentItem in firstChild .. lastChild){
                        Log.e("visible","yes")
                     }else{
+                        if(ringtoneManager!=null)
                         if(ringtoneManager!!.isPlaying){
                            ringtoneManager!!.stop()
                         }
                     }
-                    println("first visible child is: $firstChild")
-                    println("last visible child is: $lastChild")
+
 
                 }
             }
@@ -146,7 +147,7 @@ class MainActivity : AppCompatActivity() {
 
         mBinding.recyclerPlayList.adapter = adapter
     }
-    var attachmentListener: PlayListAdapter.PlayListListener =
+    private var attachmentListener: PlayListAdapter.PlayListListener =
         object : PlayListAdapter.PlayListListener {
             override fun onPlayButtonClicked(position: Int, clickedPlayList: PlayList, image: ImageView, seekBar: SeekBar) {
                 if(!clickedPlayList.isPlaying){
@@ -196,14 +197,14 @@ class MainActivity : AppCompatActivity() {
                 image: ImageView,
                 seekBar: SeekBar
             ) {
-                TODO("Not yet implemented")
+
             }
 
 
         }
 
 
-    var resultLauncher =
+    private var resultLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
                 // There are no request codes
@@ -221,12 +222,22 @@ class MainActivity : AppCompatActivity() {
                                         null, null, null, null
                                     )?.use { cursor ->
                                         cursor.moveToFirst()
+                                        val mp: MediaPlayer = MediaPlayer.create(this, uri)
+                                        val duration: Int = mp.duration
+                                        val finalDuration: Long = duration.toLong()
+                                        val myDuration: String = String.format(
+                                            "%d min, %d sec",
+                                            TimeUnit.MILLISECONDS.toMinutes(finalDuration),
+                                            TimeUnit.MILLISECONDS.toSeconds(finalDuration) -
+                                                    TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(finalDuration))
+                                        )
+                                        mp.release()
                                         val nameIndex =
                                             cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
                                         cursor.moveToFirst()
                                         val playList = PlayList(
                                             cursor.getString(nameIndex),
-                                            "10",
+                                            myDuration,
                                             false,
                                             uri.toString()
                                         )
@@ -243,12 +254,22 @@ class MainActivity : AppCompatActivity() {
                                     uri,
                                     null, null, null, null
                                 )?.use { cursor ->
+                                    val mp: MediaPlayer = MediaPlayer.create(this, uri)
+                                    val duration: Int = mp.duration
+                                    val finalDuration: Long = duration.toLong()
+                                    val myDuration: String = String.format(
+                                        "%d min, %d sec",
+                                        TimeUnit.MILLISECONDS.toMinutes(finalDuration),
+                                        TimeUnit.MILLISECONDS.toSeconds(finalDuration) -
+                                                TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(finalDuration))
+                                    )
+                                    mp.release()
                                     val nameIndex =
                                         cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
                                     cursor.moveToFirst()
                                     val playList = PlayList(
                                         cursor.getString(nameIndex),
-                                        "10",
+                                        myDuration,
                                         false,
                                         uri.toString()
                                     )
@@ -264,6 +285,12 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        ringtoneManager?.stop()
+    }
+
 
 
 }

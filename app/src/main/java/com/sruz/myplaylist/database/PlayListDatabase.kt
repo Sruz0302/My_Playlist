@@ -6,7 +6,6 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.sruz.myplaylist.database.model.PlayList
-import com.sruz.myplaylist.database.model.PlayListDAO
 
 @Database(entities = [PlayList::class], version = 1)
 abstract class PlayListDatabase: RoomDatabase() {

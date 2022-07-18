@@ -1,10 +1,11 @@
-package com.sruz.myplaylist.database.model
+package com.sruz.myplaylist.database
 
 import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
+import com.sruz.myplaylist.database.model.PlayList
 import kotlinx.coroutines.flow.Flow
 
 @Dao

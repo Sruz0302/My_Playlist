@@ -4,13 +4,13 @@ import android.app.Application
 import androidx.lifecycle.LiveData
 import com.sruz.myplaylist.database.PlayListDatabase
 import com.sruz.myplaylist.database.model.PlayList
-import com.sruz.myplaylist.database.model.PlayListDAO
+import com.sruz.myplaylist.database.PlayListDAO
 import com.sruz.myplaylist.utils.subscribeOnBackground
 
 class PlayListRepository (application: Application) {
 
-    private lateinit var playListDao: PlayListDAO
-    private lateinit var allPlayList: LiveData<List<PlayList>>
+    private var playListDao: PlayListDAO
+    private var allPlayList: LiveData<List<PlayList>>
 
     private val database = PlayListDatabase.getInstance(application)
 

@@ -63,37 +63,6 @@ object Utils {
     }
 
 
-    fun getRealPathFromURI(contentUri: Uri): String? {
-//        val context: Context = this@SignupActivity
-        var cursor: Cursor? = null
-        return try {
-            val proj = arrayOf(MediaStore.Audio.Media.DATA)
-            cursor = context?.contentResolver?.query(contentUri, proj, null, null, null)
-            val column_index = cursor!!.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA)
-            cursor.moveToFirst()
-            cursor.getString(column_index)
-        } catch (e: Exception) {
-            Log.e("Err", "getRealPathFromURI Exception : $e")
-            ""
-        } finally {
-            cursor?.close()
-        }
-    }
-
-
-
-
-    private fun getRootDirPath(context: Context): String {
-        return if (Environment.MEDIA_MOUNTED == Environment.getExternalStorageState()) {
-            val file: File = ContextCompat.getExternalFilesDirs(
-                context.applicationContext,
-                null
-            )[0]
-            file.absolutePath
-        } else {
-            context.applicationContext.filesDir.absolutePath
-        }
-    }
 
 
 }

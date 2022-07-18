@@ -2,7 +2,6 @@ package com.sruz.myplaylist.application
 
 import android.app.Application
 import com.sruz.myplaylist.helpers.CustomToast
-import com.sruz.myplaylist.helpers.RuntimePermissionUtil
 import com.sruz.myplaylist.helpers.Utils
 
 class MyApplication : Application() {
@@ -17,7 +16,6 @@ class MyApplication : Application() {
 
         Utils.applicationReference(this)
 
-        RuntimePermissionUtil.applicationReference(this)
 
     }
 
